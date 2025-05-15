@@ -1,0 +1,428 @@
+-- Enhanced ADIB HUB Autofarm GUI
+-- Inspiré de l'exemple Candy Farm mais rebrandé en ADIB HUB
+
+-- Core variables
+local farmingEnabled = false
+local player = game.Players.LocalPlayer
+
+-- Create a stylish GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "AKIRA"
+gui.ResetOnSpawn = false
+
+-- Try different parent methods based on executor compatibility
+local success = pcall(function()
+    gui.Parent = game:GetService("CoreGui")
+end)
+if not success then
+    gui.Parent = player.PlayerGui
+end
+
+-- Main frame with rounded corners, gradient and drop shadow
+local frame = Instance.new("Frame")
+frame.Name = "MainFrame"
+frame.Size = UDim2.new(0, 220, 0, 180) -- Taille du cadre
+frame.Position = UDim2.new(0.5, -110, 0.5, -90)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+-- Add rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = frame
+
+-- Add drop shadow
+local shadow = Instance.new("ImageLabel")
+shadow.Name = "Shadow"
+shadow.Size = UDim2.new(1, 20, 1, 20)
+shadow.Position = UDim2.new(0, -10, 0, -10)
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://5554236805"
+shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+shadow.ImageTransparency = 0.6
+shadow.ScaleType = Enum.ScaleType.Slice
+shadow.SliceCenter = Rect.new(23, 23, 277, 277)
+shadow.ZIndex = 0
+shadow.Parent = frame
+
+-- Gradient background for the frame
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 60)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
+})
+gradient.Rotation = 45
+gradient.Parent = frame
+
+-- Title container with fancy styling
+local titleContainer = Instance.new("Frame")
+titleContainer.Name = "TitleContainer"
+titleContainer.Size = UDim2.new(1, 0, 0, 40)
+titleContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+titleContainer.BorderSizePixel = 0
+titleContainer.Parent = frame
+
+-- Add rounded corners to title
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 8)
+titleCorner.Parent = titleContainer
+
+-- Title gradient
+local titleGradient = Instance.new("UIGradient")
+titleGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(130, 30, 255))
+})
+titleGradient.Rotation = 90
+titleGradient.Parent = titleContainer
+
+-- Title text (rebaptisé ADIB HUB)
+local titleText = Instance.new("TextLabel")
+titleText.Name = "Title"
+titleText.Size = UDim2.new(1, 0, 1, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "AKIRA"
+titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleText.Font = Enum.Font.GothamBold
+titleText.TextSize = 18
+titleText.Parent = titleContainer
+
+-- Status container with icon and improved visuals
+local statusContainer = Instance.new("Frame")
+statusContainer.Name = "StatusContainer"
+statusContainer.Size = UDim2.new(1, -20, 0, 30)
+statusContainer.Position = UDim2.new(0, 10, 0, 50)
+statusContainer.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+statusContainer.BorderSizePixel = 0
+statusContainer.Parent = frame
+
+-- Add rounded corners to status
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 6)
+statusCorner.Parent = statusContainer
+
+-- Status icon
+local statusIcon = Instance.new("TextLabel")
+statusIcon.Name = "StatusIcon"
+statusIcon.Size = UDim2.new(0, 30, 0, 30)
+statusIcon.BackgroundTransparency = 1
+statusIcon.Text = "⏱️"
+statusIcon.TextColor3 = Color3.fromRGB(200, 200, 255)
+statusIcon.Font = Enum.Font.GothamBold
+statusIcon.TextSize = 16
+statusIcon.Parent = statusContainer
+
+-- Status text
+local status = Instance.new("TextLabel")
+status.Name = "Status"
+status.Size = UDim2.new(1, -40, 1, 0)
+status.Position = UDim2.new(0, 30, 0, 0)
+status.BackgroundTransparency = 1
+status.Text = "READY"
+status.TextColor3 = Color3.fromRGB(200, 200, 255)
+status.Font = Enum.Font.Gotham
+status.TextSize = 14
+status.TextXAlignment = Enum.TextXAlignment.Left
+status.Parent = statusContainer
+
+-- Progress bar container
+local progressBarContainer = Instance.new("Frame")
+progressBarContainer.Name = "ProgressBarContainer"
+progressBarContainer.Size = UDim2.new(1, -20, 0, 6)
+progressBarContainer.Position = UDim2.new(0, 10, 0, 85)
+progressBarContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+progressBarContainer.BorderSizePixel = 0
+progressBarContainer.Parent = frame
+
+-- Rounded corners for progress bar
+local progressBarCorner = Instance.new("UICorner")
+progressBarCorner.CornerRadius = UDim.new(1, 0)
+progressBarCorner.Parent = progressBarContainer
+
+-- Progress bar fill
+local progressBarFill = Instance.new("Frame")
+progressBarFill.Name = "ProgressBarFill"
+progressBarFill.Size = UDim2.new(0, 0, 1, 0)
+progressBarFill.BackgroundColor3 = Color3.fromRGB(130, 70, 255)
+progressBarFill.BorderSizePixel = 0
+progressBarFill.Parent = progressBarContainer
+
+-- Rounded corners for progress bar fill
+local progressBarFillCorner = Instance.new("UICorner")
+progressBarFillCorner.CornerRadius = UDim.new(1, 0)
+progressBarFillCorner.Parent = progressBarFill
+
+-- Gradient for progress bar fill
+local progressBarGradient = Instance.new("UIGradient")
+progressBarGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(130, 70, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 120, 255))
+})
+progressBarGradient.Parent = progressBarFill
+
+-- Credits label (rebaptisé avec ADIB HUB)
+local creditsContainer = Instance.new("Frame")
+creditsContainer.Name = "CreditsContainer"
+creditsContainer.Size = UDim2.new(1, -20, 0, 20)
+creditsContainer.Position = UDim2.new(0, 10, 0, 95)
+creditsContainer.BackgroundTransparency = 1
+creditsContainer.Parent = frame
+
+local creditsLabel = Instance.new("TextLabel")
+creditsLabel.Name = "CreditsLabel"
+creditsLabel.Size = UDim2.new(1, 0, 1, 0)
+creditsLabel.BackgroundTransparency = 1
+creditsLabel.Text = "Made by AKIRA"
+creditsLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
+creditsLabel.Font = Enum.Font.Gotham
+creditsLabel.TextSize = 12
+creditsLabel.Parent = creditsContainer
+
+-- Start Button
+local startButton = Instance.new("TextButton")
+startButton.Name = "StartButton"
+startButton.Size = UDim2.new(0.5, -15, 0, 36)
+startButton.Position = UDim2.new(0, 10, 1, -46)
+startButton.BackgroundColor3 = Color3.fromRGB(40, 180, 120)
+startButton.BorderSizePixel = 0
+startButton.Text = "▶ START"
+startButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+startButton.Font = Enum.Font.GothamBold
+startButton.TextSize = 16
+startButton.Parent = frame
+
+local startButtonCorner = Instance.new("UICorner")
+startButtonCorner.CornerRadius = UDim.new(0, 8)
+startButtonCorner.Parent = startButton
+
+-- Stop Button
+local stopButton = Instance.new("TextButton")
+stopButton.Name = "StopButton"
+stopButton.Size = UDim2.new(0.5, -15, 0, 36)
+stopButton.Position = UDim2.new(0.5, 5, 1, -46)
+stopButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+stopButton.BorderSizePixel = 0
+stopButton.Text = "■ STOP"
+stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopButton.Font = Enum.Font.GothamBold
+stopButton.TextSize = 16
+stopButton.Parent = frame
+
+local stopButtonCorner = Instance.new("UICorner")
+stopButtonCorner.CornerRadius = UDim.new(0, 8)
+stopButtonCorner.Parent = stopButton
+
+-- Functions for updating status and progress
+local function updateStatus(text, icon)
+    status.Text = text
+    if icon then
+        statusIcon.Text = icon
+    end
+end
+
+local function updateProgressBar(percentage)
+    progressBarFill:TweenSize(
+        UDim2.new(percentage / 100, 0, 1, 0),
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Quad,
+        0.2,
+        true
+    )
+end
+
+-- Function to simulate key press E (for actions)
+local function pressE()
+    pcall(function()
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, "E", false, game)
+        wait(0.1)
+        game:GetService("VirtualInputManager"):SendKeyEvent(false, "E", false, game)
+    end)
+    pcall(function()
+        keypress(0x45)
+        wait(0.1)
+        keyrelease(0x45)
+    end)
+    pcall(function()
+        keypress(69)
+        wait(0.1)
+        keyrelease(69)
+    end)
+end
+
+-- Function to equip an item by name
+local function equipItem(itemName)
+    updateStatus("EQUIP: " .. itemName, "🔄")
+    local backpack = player.Backpack
+    local item = backpack:FindFirstChild(itemName)
+    if item then
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:EquipTool(item)
+            wait(0.5)
+            return true
+        end
+    else
+        updateStatus("NO " .. itemName, "⚠️")
+        wait(1)
+        return false
+    end
+    return false
+end
+
+-- Main farming function
+local function startFarming()
+    spawn(function()
+        while farmingEnabled do
+            -- Exemple d'utilisation (adaptable en fonction du jeu) :
+
+            -- Eau
+            if equipItem("Water") then
+                updateStatus("USING WATER", "💧")
+                pressE()
+                for i = 25, 1, -1 do
+                    if not farmingEnabled then break end
+                    updateStatus("WAIT: " .. i .. "s", "⏱️")
+                    updateProgressBar((25 - i) * 4)
+                    wait(1)
+                end
+            else
+                farmingEnabled = false
+                break
+            end
+
+            if not farmingEnabled then break end
+
+            -- Sac de sucre (adaptable)
+            if equipItem("Sugar Block Bag") then
+                updateStatus("USING SUGAR", "🧂")
+                pressE()
+                wait(1)
+            else
+                farmingEnabled = false
+                break
+            end
+
+            if not farmingEnabled then break end
+
+            -- Gélatine (adaptable)
+            if equipItem("Gelatin") then
+                updateStatus("USING GELATIN", "🍮")
+                pressE()
+                for i = 50, 1, -1 do
+                    if not farmingEnabled then break end
+                    updateStatus("WAIT: " .. i .. "s", "⏱️")
+                    updateProgressBar((50 - i) * 2)
+                    wait(1)
+                end
+                if not farmingEnabled then break end
+                updateStatus("FINISHING", "✨")
+                pressE()
+                wait(1)
+                if equipItem("Empty Bag") then
+                    updateStatus("USING EMPTY BAG", "👜")
+                    pressE()
+                    wait(1)
+                end
+            else
+                farmingEnabled = false
+                break
+            end
+
+            updateStatus("CYCLE DONE", "✅")
+            updateProgressBar(100)
+            wait(1)
+            updateProgressBar(0)
+        end
+        updateStatus("STOPPED", "⏹️")
+        updateProgressBar(0)
+    end)
+end
+
+-- Button functions with hover effects
+startButton.MouseEnter:Connect(function()
+    startButton:TweenSize(UDim2.new(0.5, -13, 0, 38), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+end)
+startButton.MouseLeave:Connect(function()
+    startButton:TweenSize(UDim2.new(0.5, -15, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+end)
+stopButton.MouseEnter:Connect(function()
+    stopButton:TweenSize(UDim2.new(0.5, -13, 0, 38), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+end)
+stopButton.MouseLeave:Connect(function()
+    stopButton:TweenSize(UDim2.new(0.5, -15, 0, 36), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+end)
+
+startButton.MouseButton1Click:Connect(function()
+    if not farmingEnabled then
+        farmingEnabled = true
+        updateStatus("STARTING...", "🚀")
+        startFarming()
+    end
+end)
+
+stopButton.MouseButton1Click:Connect(function()
+    farmingEnabled = false
+    updateStatus("STOPPING...", "🛑")
+end)
+
+-- Anti-AFK
+local VU = game:GetService("VirtualInputManager")
+player.Idled:Connect(function()
+    VU:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    wait(1)
+    VU:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+-- Animate Splash Screen
+spawn(function()
+    splashContainer.Position = UDim2.new(0.5, -150, -0.5, -75)
+    bouhjarName.TextTransparency = 1
+    splashTitle.TextTransparency = 1
+    glowEffect.ImageTransparency = 1
+
+    splashContainer:TweenPosition(UDim2.new(0.5, -150, 0.5, -75), Enum.EasingDirection.Out, Enum.EasingStyle.Bounce, 1, true)
+    wait(0.5)
+    for i = 1, 0, -0.1 do
+        splashTitle.TextTransparency = i
+        wait(0.05)
+    end
+    wait(0.3)
+    for i = 1, 0, -0.1 do
+        bouhjarName.TextTransparency = i
+        glowEffect.ImageTransparency = 0.6 + (i * 0.4)
+        wait(0.05)
+    end
+    for i = 1, 3 do
+        bouhjarName:TweenSize(UDim2.new(1, 0, 0, 65), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.3, true)
+        wait(0.3)
+        bouhjarName:TweenSize(UDim2.new(1, 0, 0, 60), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.3, true)
+        wait(0.3)
+    end
+    wait(0.5)
+    for i = 0, 1, 0.1 do
+        splashScreen.BackgroundTransparency = 0.5 + (i * 0.5)
+        splashContainer.BackgroundTransparency = i
+        splashTitle.TextTransparency = i
+        bouhjarName.TextTransparency = i
+        glowEffect.ImageTransparency = 0.6 + (i * 0.4)
+        wait(0.05)
+    end
+    splashScreen.Visible = false
+end)
+
+-- Cool initial animation for progress bar
+updateStatus("READY", "✨")
+for i = 0, 100, 5 do
+    updateProgressBar(i)
+    wait(0.01)
+end
+for i = 100, 0, -5 do
+    updateProgressBar(i)
+    wait(0.01)
+end
+
+print("Enhanced ADIB HUB Autofarm GUI loaded! Look for the new GUI in the center of your screen.")
